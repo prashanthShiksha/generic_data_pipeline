@@ -1,0 +1,39 @@
+[
+  {
+    "fetchID": {
+      "input": "none",
+      "query": "SELECT DISTINCT(sa.mentee_id) FROM session_attendees sa",
+      "database_name": "elevate",
+      "id": "mentee_id"
+    },
+    "child": [
+      {
+        "single_process": {
+          "input": "mentee_id",
+          "query": "SELECT ue.designation, ue.experience FROM user_extensions ue WHERE ue.user_id = ${id}",
+          "database_name": "elevate",
+          "join_on": "none",
+          "join_type": "none"
+        }
+      },
+      {
+        "single_process": {
+          "input": "mentee_id",
+          "query": "SELECT count(sa.mentee_id) as No_of_sessions_enrolled_in, count(sa.joined_at) as No_of_sessions_attended FROM session_attendees sa WHERE sa.mentee_id = ${id}",
+          "database_name": "elevate",
+          "join_on": "mentee_id",
+          "join_type": "inner"
+        }
+      },
+      {
+        "single_process": {
+          "input": "mentee_id",
+          "query": "SELECT u.name as mentee_name, u.location as state FROM users u WHERE u.id = ${id}",
+          "database_name": "elevate_user",
+          "join_on": "mentee_id",
+          "join_type": "inner"
+        }
+      }
+    ]
+  }
+]

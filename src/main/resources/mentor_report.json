@@ -1,0 +1,80 @@
+[
+  {
+    "fetchID": {
+      "input": "none",
+      "query": "SELECT DISTINCT(mentor_id) FROM sessions WHERE status = 'COMPLETED'",
+      "database_name": "elevate",
+      "id": "mentor_id",
+      "list_name": "mentorIdList"
+    },
+    "child": [
+      {
+        "single_process": {
+          "input": "mentor_id",
+          "query": "SELECT  me.designation, me.area_of_expertise, me.experience FROM mentor_extensions me WHERE me.user_id = ${id}",
+          "database_name": "elevate",
+          "join_om": "none",
+          "join_type": "none"
+        }
+      },
+      {
+        "single_process": {
+          "input": "mentor_id",
+          "query": "SELECT count(s.mentor_id) as No_of_session_created, count(s.started_at) as No_of_sessions_conducted FROM sessions s WHERE s.mentor_id = ${id}",
+          "database_name": "elevate",
+          "join_on": "mentor_id",
+          "join_type": "inner"
+
+        }
+      },
+      {
+        "fetchID_with_InputID": {
+          "input": "mentor_id",
+          "query": "select distinct(s.id) as session_id from sessions s where s.mentor_id =${id}",
+          "database_name": "elevate",
+          "id": "session_id",
+          "list_name": "sessionIDList",
+          "join_on": "mentor_id",
+          "join_type": "inner"
+        },
+        "child": [
+          {
+            "multiple_process": {
+              "input": "sessionIDList",
+              "query": "SELECT f.response FROM feedbacks f where f.session_id = ${id} and f.question_id = 13 ",
+              "database_name": "elevate",
+              "groupBy": "question_id",
+              "agg": "sum",
+              "agg_on": "response",
+              "join_on": "mentor_id",
+              "join_type": "inner",
+              "rename": "mentor_rating"
+            }
+          },
+          {
+            "multiple_process": {
+              "input": "sessionIDList",
+              "query": "SELECT f.response FROM feedbacks f where f.session_id = ${id} and f.question_id = 14",
+              "database_name": "elevate",
+              "groupBy": "question_id",
+              "agg": "sum",
+              "agg_on": "response",
+              "join_on": "mentor_id",
+              "join_type": "inner",
+              "rename": "session_engagement_rating"
+            }
+          }
+        ]
+      },
+      {
+        "single_process": {
+          "input": "mentor_id",
+          "query": "SELECT u.id as mentor_id, u.name as mentor_name FROM users u WHERE u.id = ${id}",
+          "database_name": "elevate_user",
+          "join_on": "mentor_id",
+          "join_type": "inner"
+        }
+      }
+    ]
+  }
+]

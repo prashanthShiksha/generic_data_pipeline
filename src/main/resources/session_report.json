@@ -1,0 +1,57 @@
+[
+  {
+    "fetchID": {
+      "input": "none",
+      "query": "SELECT id as session_id FROM sessions where status = 'COMPLETED'",
+      "database_name": "elevate",
+      "id": "session_id"
+    },
+    "child": [
+      {
+        "single_process": {
+          "input": "session_id",
+          "query": "SELECT s.mentor_id AS Mentor_UUID, s.title AS Title_of_the_session, s.recommended_for AS Recommended_for,s.medium AS Languages,s.created_at AS Timestamp_of_session_creation,s.started_at AS Timestamp_of_session_scheduled,s.completed_at,s.categories FROM sessions s WHERE id = ${id}",
+          "database_name": "elevate",
+          "join_on": "none",
+          "join_type": "none"
+        }
+      },
+      {
+        "single_process": {
+          "input": "session_id",
+          "query": "SELECT COUNT(sa.mentee_id) AS No_of_mentees_enrolled FROM session_attendees sa WHERE sa.session_id = ${id}",
+          "database_name": "elevate",
+          "join_on": "session_id",
+          "join_type": "inner"
+        }
+      },
+      {
+        "single_process": {
+          "input": "session_id",
+          "query": "SELECT COUNT(sa.joined_at) AS No_of_mentees_attended_the_session FROM session_attendees sa WHERE sa.session_id = ${id}",
+          "database_name": "elevate",
+          "join_on": "session_id",
+          "join_type": "inner"
+        }
+      },
+      {
+        "single_process": {
+          "input": "session_id",
+          "query": "SELECT COUNT(sa.is_feedback_skipped) AS No_of_Mentees_who_gave_feedback FROM session_attendees sa WHERE sa.session_id = ${id} and sa.is_feedback_skipped = false",
+          "database_name": "elevate",
+          "join_on": "session_id",
+          "join_type": "inner"
+        }
+      },
+      {
+        "single_process": {
+          "input": "session_id",
+          "query": "SELECT f.question_id,f.response FROM feedbacks f WHERE f.session_id = ${id}",
+          "database_name": "elevate",
+          "join_on": "session_id",
+          "join_type": "inner"
+        }
+      }
+    ]
+  }
+]
